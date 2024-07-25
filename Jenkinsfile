@@ -57,7 +57,7 @@ pipeline {
                 sh 'trivy image $IMAGE_REPO:$IMAGE_VERSION'
             }
         }
-        stage('Zap Scan") {
+        stage('Zap Scan') {
               steps {
                   sh 'mkdir -p ${WORK_DIR}' 
                   sh 'mkdir -p ${CONFIG_DIR}'
