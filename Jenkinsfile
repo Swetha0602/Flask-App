@@ -10,7 +10,8 @@ pipeline {
         COSIGN_PRIVATE_KEY=credentials('cosign-private-key')
         COSIGN_PUBLIC_KEY=credentials('cosign-public-key')
     }
-         stage('Pre SAST') {
+    stages {     
+    stage('Pre SAST') {
              steps {
                  sh 'gitleaks version'
                  sh 'gitleaks detect --source . -v || true'
