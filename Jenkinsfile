@@ -148,9 +148,7 @@ pipeline {
 
     } 
 
-} 
-                  
-        stage('Sign and Verify image with Cosign'){
+	stage('Sign and Verify image with Cosign'){
             steps{
                 sh 'echo "y" | cosign sign --key $COSIGN_PRIVATE_KEY docker.io/$IMAGE_REPO:$IMAGE_VERSION'
                 sh 'cosign verify --key $COSIGN_PUBLIC_KEY docker.io/$IMAGE_REPO:$IMAGE_VERSION'
