@@ -9,6 +9,10 @@ pipeline {
         COSIGN_PASSWORD=credentials('cosign-password')
         COSIGN_PRIVATE_KEY=credentials('cosign-private-key')
         COSIGN_PUBLIC_KEY=credentials('cosign-public-key')
+         ZAP_IMAGE = 'ghcr.io/zaproxy/zaproxy:stable' 
+         TARGET_URL = 'http://10.45.88.84:5000' 
+         WORK_DIR = 'zap_work' 
+         CONFIG_DIR = 'zap_config'  
     }
     stages {     
     stage('Pre SAST') {
@@ -53,6 +57,99 @@ pipeline {
                 sh 'trivy image $IMAGE_REPO:$IMAGE_VERSION'
             }
         }
+        stage('Zap Scan") {
+              steps {
+                  sh 'mkdir -p ${WORK_DIR}' 
+                  sh 'mkdir -p ${CONFIG_DIR}'
+                  writeFile file: "${CONFIG_DIR}/alert_filters.json", text: ''' 
+                    [ 
+                        {"ruleId": "100001", "url": ".*", "newLevel": 0, "urlIsRegex": true}, 
+
+                        {"ruleId": "10020", "url": ".*", "newLevel": 0, "urlIsRegex": true}, 
+
+                        {"ruleId": "10021", "url": ".*", "newLevel": 0, "urlIsRegex": true}, 
+
+                        {"ruleId": "10036", "url": ".*", "newLevel": 0, "urlIsRegex": true}, 
+
+                        {"ruleId": "10038", "url": ".*", "newLevel": 0, "urlIsRegex": true}, 
+
+                        {"ruleId": "10063", "url": ".*", "newLevel": 0, "urlIsRegex": true} 
+
+                    ] 
+                    '''
+                }
+            }
+        }
+        stage('Run OWASP ZAP Scan') { 
+
+            steps { 
+
+                script { 
+
+                    def zapScanResult = sh script: """ 
+
+                        sudo docker run --rm --net='host' -v \$(pwd)/${WORK_DIR}:/zap/wrk -v \$(pwd)/${CONFIG_DIR}:/zap/config ${ZAP_IMAGE} zap-api-scan.py -t ${TARGET_URL} -f openapi -r /zap/wrk/zap_report.html -J /zap/config/alert_filters.json 
+
+                    """, returnStatus: true 
+
+                    // Check the exit code and print warnings or errors 
+
+                    if (zapScanResult != 0) { 
+
+                        echo "Error running OWASP ZAP scan: script returned exit code ${zapScanResult}" 
+
+                    } 
+                } 
+
+            } 
+
+        } 
+        stage('Generate and Archive Report') { 
+
+            steps { 
+
+                script { 
+
+                    // Archive ZAP report as a build artifact 
+
+                    archiveArtifacts artifacts: 'zap_work/zap_report.html', onlyIfSuccessful: true 
+
+                } 
+
+            } 
+
+        } 
+        stage('Stop OWASP ZAP Docker Container') { 
+
+            steps { 
+
+                script { 
+
+                    // Stop OWASP ZAP Docker container 
+
+                    sh "sudo docker stop zap && sudo docker rm zap" 
+
+                } 
+
+            } 
+
+        } 
+
+	} 
+    post { 
+
+        always { 
+
+            // Notify or clean up actions 
+
+            echo 'Pipeline execution completed.' 
+
+        } 
+
+    } 
+
+} 
+                  
         stage('Sign and Verify image with Cosign'){
             steps{
                 sh 'echo "y" | cosign sign --key $COSIGN_PRIVATE_KEY docker.io/$IMAGE_REPO:$IMAGE_VERSION'
