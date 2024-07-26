@@ -51,7 +51,10 @@ pipeline {
         stage ('Checkov Scan') {
             steps {
                 script {
-                    sh 'sudo checkov -d .'
+                    sh '''
+                    cd helmcharts
+                    sudo checkov -d .
+                    '''
                 }
             }
         }
