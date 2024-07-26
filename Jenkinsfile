@@ -51,7 +51,7 @@ pipeline {
         stage ('Checkov Scan') {
             steps {
                 script {
-                    sh 'checkov -d .'
+                    sh 'sudo checkov -d .'
                 }
             }
         }
