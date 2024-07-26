@@ -48,6 +48,13 @@ pipeline {
                 }
             }
         }
+        stage ('Checkov Scan') {
+            steps {
+                script {
+                    sh 'checkov -d .'
+                }
+            }
+        }
         stage('Trivy Scan') {
             steps {
                 sh 'trivy image $IMAGE_REPO:$IMAGE_VERSION'
