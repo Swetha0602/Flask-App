@@ -15,7 +15,7 @@ pipeline {
         CONFIG_DIR = 'zap_config'
     }
     stages { 
-   /* 
+
     stage('Pre SAST') {
              steps {
                  sh 'gitleaks version'
@@ -62,7 +62,7 @@ pipeline {
                 }
             }
         }
-	*/
+	/*
         stage('ZAP Integration') {
             steps {
                 script {
@@ -129,7 +129,7 @@ pipeline {
                 }
             }
         }
-	    
+	 */   
         stage('Trivy Scan') {
             steps {
                 sh 'trivy image $IMAGE_REPO:$IMAGE_VERSION'
