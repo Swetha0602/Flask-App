@@ -134,6 +134,7 @@ pipeline {
             echo 'Pipeline execution completed.'
         }
     }
+    }
         stage('Trivy Scan') {
             steps {
                 sh 'trivy image $IMAGE_REPO:$IMAGE_VERSION'
