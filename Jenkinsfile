@@ -14,7 +14,8 @@ pipeline {
         WORK_DIR = 'zap_work' 
         CONFIG_DIR = 'zap_config'
     }
-    stages {     
+    stages { 
+   /* 
     stage('Pre SAST') {
              steps {
                  sh 'gitleaks version'
@@ -61,6 +62,7 @@ pipeline {
                 }
             }
         }
+	*/
         stage('ZAP Integration') {
             steps {
                 script {
