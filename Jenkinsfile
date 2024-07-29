@@ -128,7 +128,7 @@ pipeline {
             }
         }
 		
-		post {
+	post {
         always {
             // Notify or clean up actions
             echo 'Pipeline execution completed.'
